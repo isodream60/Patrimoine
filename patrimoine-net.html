@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mon Patrimoine Net</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --bg2: #161b25;
+      --bg3: #1e2535;
+      --border: rgba(255,255,255,0.08);
+      --border2: rgba(255,255,255,0.14);
+      --text: #f0f2f8;
+      --text2: #8b93a8;
+      --text3: #4f5668;
+      --green: #00d4a0;
+      --green-bg: rgba(0,212,160,0.1);
+      --red: #ff5f5f;
+      --red-bg: rgba(255,95,95,0.1);
+      --blue: #4f9eff;
+      --blue-bg: rgba(79,158,255,0.1);
+      --amber: #f5a623;
+      --amber-bg: rgba(245,166,35,0.1);
+      --purple: #a78bfa;
+      --purple-bg: rgba(167,139,250,0.1);
+      --teal: #2dd4bf;
+      --teal-bg: rgba(45,212,191,0.1);
+      --coral: #fb7185;
+      --coral-bg: rgba(251,113,133,0.1);
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── GRID BG ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(79,158,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(79,158,255,0.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 2.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .header-title {
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text3);
+      margin-bottom: 6px;
+    }
+    .header h1 {
+      font-size: 28px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.02em;
+    }
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border2);
+      background: var(--bg3);
+      color: var(--text2);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+    .btn:hover { background: var(--bg2); color: var(--text); border-color: var(--border2); }
+    .btn-primary { background: var(--blue-bg); color: var(--blue); border-color: rgba(79,158,255,0.3); }
+    .btn-primary:hover { background: rgba(79,158,255,0.2); color: var(--blue); }
+    .btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+    .btn.spinning svg.spin { animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── TOTAL HERO ── */
+    .hero {
+      background: linear-gradient(135deg, var(--bg2) 0%, var(--bg3) 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem 2.5rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 200px; height: 200px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(79,158,255,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+    }
+    .hero-value {
+      font-size: 42px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.03em;
+      font-variant-numeric: tabular-nums;
+    }
+    .hero-change {
+      font-size: 14px;
+      margin-top: 6px;
+      font-weight: 500;
+    }
+    .pos { color: var(--green); }
+    .neg { color: var(--red); }
+    .hero-stats {
+      display: flex;
+      gap: 2.5rem;
+      flex-wrap: wrap;
+    }
+    .stat {
+      text-align: right;
+    }
+    .stat-label {
+      font-size: 11px;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 4px;
+    }
+    .stat-value {
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+    }
+    .stat-dot {
+      display: inline-block;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      margin-right: 5px;
+      vertical-align: middle;
+    }
+
+    /* ── CHART ROW ── */
+    .chart-row {
+      display: grid;
+      grid-template-columns: 1fr 240px;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    @media(max-width: 700px) { .chart-row { grid-template-columns: 1fr; } }
+    .chart-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+    }
+    .chart-title {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 1rem;
+    }
+    .donut-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+    .legend { width: 100%; }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text2);
+      padding: 4px 0;
+      justify-content: space-between;
+    }
+    .legend-left { display: flex; align-items: center; gap: 8px; }
+    .legend-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+    .legend-pct { font-weight: 600; color: var(--text); font-size: 12px; font-variant-numeric: tabular-nums; }
+
+    /* ── SECTION ── */
+    .section-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 10px;
+      margin-top: 2rem;
+    }
+
+    /* ── ACCOUNT CARDS ── */
+    .accounts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 10px;
+    }
+    .account-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      user-select: none;
+    }
+    .account-card:hover { border-color: var(--border2); background: var(--bg3); }
+    .account-card.active { border-color: var(--border2); background: var(--bg3); }
+    .ac-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    .ac-icon {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    .ac-badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 20px;
+      letter-spacing: 0.05em;
+    }
+    .ac-name { font-size: 13px; color: var(--text2); margin-bottom: 3px; }
+    .ac-value { font-size: 20px; font-weight: 600; color: var(--text); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+    .ac-sub { font-size: 12px; color: var(--text3); margin-top: 3px; }
+    .ac-bar { height: 2px; background: var(--border); border-radius: 2px; margin-top: 12px; overflow: hidden; }
+    .ac-bar-fill { height: 100%; border-radius: 2px; transition: width 0.8s cubic-bezier(0.4,0,0.2,1); }
+    .chevron { font-size: 12px; color: var(--text3); transition: transform 0.2s; }
+    .account-card.active .chevron { transform: rotate(180deg); }
+
+    /* ── EXPANDED PANEL ── */
+    .panel-wrap { grid-column: 1 / -1; display: none; }
+    .panel-wrap.open { display: block; }
+    .panel {
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 2px;
+    }
+
+    /* ── TABLE ── */
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead th {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      padding: 0 0 10px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+    }
+    thead th:nth-child(n+3) { text-align: right; }
+    tbody td {
+      padding: 9px 0;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+      vertical-align: middle;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody td:nth-child(n+3) { text-align: right; }
+    .ticker { font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500; color: var(--text3); background: var(--bg3); padding: 2px 6px; border-radius: 4px; margin-left: 6px; }
+    .price-tag { font-family: 'DM Mono', monospace; font-size: 12px; }
+    .loading-dot { color: var(--text3); font-size: 12px; }
+    .del-btn {
+      background: transparent; border: none; cursor: pointer;
+      color: var(--text3); font-size: 14px; padding: 2px 6px;
+      border-radius: 4px; transition: all 0.15s;
+    }
+    .del-btn:hover { color: var(--red); background: var(--red-bg); }
+
+    /* ── ADD ROW ── */
+    .add-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+    .add-row input, .add-row select {
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      padding: 7px 10px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .add-row input:focus, .add-row select:focus { border-color: var(--blue); }
+    .add-row input::placeholder { color: var(--text3); }
+    .add-row input[type=number] { width: 80px; }
+    .add-row select { cursor: pointer; }
+    .add-row .btn-add {
+      background: var(--blue-bg);
+      border: 1px solid rgba(79,158,255,0.25);
+      color: var(--blue);
+      border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 7px 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex; align-items: center; gap: 5px;
+    }
+    .add-row .btn-add:hover { background: rgba(79,158,255,0.2); }
+    .qty-input {
+      background: transparent;
+      border: none;
+      border-bottom: 1px dashed var(--border2);
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      width: 70px;
+      text-align: right;
+      outline: none;
+      padding: 2px 0;
+    }
+    .qty-input:focus { border-bottom-color: var(--blue); }
+    .cash-input {
+      background: transparent;
+      border: none;
+      border-bottom: 1px dashed var(--border2);
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 16px;
+      font-weight: 500;
+      width: 160px;
+      outline: none;
+      padding: 2px 0;
+    }
+    .cash-input:focus { border-bottom-color: var(--blue); }
+
+    /* ── STATUS BAR ── */
+    .status-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 2.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text3);
+    }
+    .status-dot {
+      display: inline-block;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      margin-right: 6px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.4} }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed;
+      bottom: 24px; right: 24px;
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      padding: 10px 16px;
+      font-size: 13px;
+      color: var(--text2);
+      opacity: 0;
+      transform: translateY(8px);
+      transition: all 0.3s;
+      z-index: 100;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div>
+      <div class="header-title">Tableau de bord financier</div>
+      <h1>Mon Patrimoine Net</h1>
+    </div>
+    <div class="header-actions">
+      <button class="btn" id="export-btn" onclick="exportData()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        Exporter
+      </button>
+      <button class="btn" id="import-btn" onclick="document.getElementById('import-file').click()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+        Importer
+      </button>
+      <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)" />
+      <button class="btn btn-primary" id="refresh-btn" onclick="refreshAll()">
+        <svg class="spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+        Actualiser
+      </button>
+    </div>
+  </div>
+
+  <!-- HERO TOTAL -->
+  <div class="hero">
+    <div>
+      <div class="hero-label">Patrimoine total estimé (CAD)</div>
+      <div class="hero-value" id="hero-value">—</div>
+      <div class="hero-change" id="hero-change"></div>
+    </div>
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-label"><span class="stat-dot" style="background:var(--blue)"></span>Investissements</div>
+        <div class="stat-value" id="stat-inv">—</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label"><span class="stat-dot" style="background:var(--coral)"></span>Crypto</div>
+        <div class="stat-value" id="stat-crypto">—</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label"><span class="stat-dot" style="background:var(--green)"></span>Liquidités</div>
+        <div class="stat-value" id="stat-cash">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHART ROW -->
+  <div class="chart-row">
+    <div class="chart-card">
+      <div class="chart-title">Évolution du patrimoine (simulation basée sur vos actifs)</div>
+      <div style="position:relative;height:180px;">
+        <canvas id="lineChart" role="img" aria-label="Graphique d'évolution du patrimoine"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Répartition</div>
+      <div class="donut-wrap">
+        <canvas id="donutChart" role="img" aria-label="Répartition du patrimoine" width="140" height="140"></canvas>
+        <div class="legend" id="donut-legend"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTIONS -->
+  <div class="section-label">📋 Comptes enregistrés</div>
+  <div class="accounts-grid" id="registered-grid"></div>
+
+  <div class="section-label">📈 Comptes non enregistrés</div>
+  <div class="accounts-grid" id="other-grid"></div>
+
+  <div class="section-label">🏦 Liquidités &amp; Urgences</div>
+  <div class="accounts-grid" id="cash-grid"></div>
+
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <div><span class="status-dot"></span><span id="last-update">En attente de la première actualisation…</span></div>
+    <div>Taux USD→CAD : <strong id="usd-rate">1.365</strong> · Mise à jour auto : 60 sec</div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════
+//  CONFIG & ÉTAT
+// ════════════════════════════════
+let CAD_RATE = 1.365;
+let prices = {};
+let prevTotal = null;
+let donutChart = null;
+let lineChart = null;
+let historyData = [];
+
+const ACCOUNT_COLORS = {
+  celi:    'var(--green)',
+  reer:    'var(--blue)',
+  celiapp: 'var(--amber)',
+  mine:    'var(--amber)',
+  margin:  'var(--purple)',
+  crypto:  'var(--coral)',
+  urgence: 'var(--teal)',
+  courant: 'var(--text3)',
+};
+
+const STORED_KEY = 'patrimoine_accounts_v2';
+
+const DEFAULT_ACCOUNTS = [
+  {
+    id: 'celi', name: 'CÉLI', type: 'registered', emoji: '🛡️',
+    badge: 'Sans impôt', color: '#00d4a0', colorVar: '--green',
+    holdings: [
+      { name: 'Shopify', ticker: 'SHOP.TO', qty: 12, currency: 'CAD' },
+      { name: 'Royal Bank', ticker: 'RY.TO', qty: 20, currency: 'CAD' },
+      { name: 'iShares S&P500', ticker: 'XSP.TO', qty: 50, currency: 'CAD' },
+    ]
+  },
+  {
+    id: 'reer', name: 'REER', type: 'registered', emoji: '🏛️',
+    badge: 'Déductible', color: '#4f9eff', colorVar: '--blue',
+    holdings: [
+      { name: 'Vanguard Canada', ticker: 'VCN.TO', qty: 100, currency: 'CAD' },
+      { name: 'Apple', ticker: 'AAPL', qty: 5, currency: 'USD' },
+      { name: 'Microsoft', ticker: 'MSFT', qty: 3, currency: 'USD' },
+    ]
+  },
+  {
+    id: 'celiapp', name: 'CÉLIAPP', type: 'registered', emoji: '🏠',
+    badge: 'Maison', color: '#f5a623', colorVar: '--amber',
+    holdings: [
+      { name: 'Fidelity All-in-One', ticker: 'FBAL.TO', qty: 80, currency: 'CAD' },
+      { name: 'TD Bank', ticker: 'TD.TO', qty: 15, currency: 'CAD' },
+    ]
+  },
+  {
+    id: 'mine', name: 'Actions minières', type: 'other', emoji: '⛏️',
+    badge: 'Ressources', color: '#f5a623', colorVar: '--amber',
+    holdings: [
+      { name: 'Barrick Gold', ticker: 'ABX.TO', qty: 200, currency: 'CAD' },
+      { name: 'Agnico Eagle', ticker: 'AEM.TO', qty: 30, currency: 'CAD' },
+      { name: 'First Quantum', ticker: 'FM.TO', qty: 100, currency: 'CAD' },
+    ]
+  },
+  {
+    id: 'margin', name: 'Compte marge', type: 'other', emoji: '📊',
+    badge: 'Imposable', color: '#a78bfa', colorVar: '--purple',
+    holdings: [
+      { name: 'Nvidia', ticker: 'NVDA', qty: 8, currency: 'USD' },
+      { name: 'Amazon', ticker: 'AMZN', qty: 4, currency: 'USD' },
+    ]
+  },
+  {
+    id: 'crypto', name: 'Crypto', type: 'crypto', emoji: '₿',
+    badge: 'Crypto', color: '#fb7185', colorVar: '--coral',
+    holdings: [
+      { name: 'Bitcoin', ticker: 'BTC-CAD', qty: 0.15, currency: 'CAD' },
+      { name: 'Ethereum', ticker: 'ETH-CAD', qty: 2.5, currency: 'CAD' },
+      { name: 'Solana', ticker: 'SOL-CAD', qty: 20, currency: 'CAD' },
+    ]
+  },
+  {
+    id: 'urgence', name: 'Fonds urgence', type: 'cash', emoji: '🏦',
+    badge: 'Liquidités', color: '#2dd4bf', colorVar: '--teal',
+    cash: 8500
+  },
+  {
+    id: 'courant', name: 'Compte courant', type: 'cash', emoji: '💳',
+    badge: 'Courant', color: '#8b93a8', colorVar: '--text2',
+    cash: 3200
+  },
+];
+
+// ════════════════════════════════
+//  PERSISTANCE
+// ════════════════════════════════
+function loadAccounts() {
+  try {
+    const saved = localStorage.getItem(STORED_KEY);
+    if (saved) return JSON.parse(saved);
+  } catch(e) {}
+  return JSON.parse(JSON.stringify(DEFAULT_ACCOUNTS));
+}
+function saveAccounts() {
+  try { localStorage.setItem(STORED_KEY, JSON.stringify(ACCOUNTS)); } catch(e) {}
+}
+
+let ACCOUNTS = loadAccounts();
+
+// ════════════════════════════════
+//  FORMAT
+// ════════════════════════════════
+function fmt(val, dec=0) {
+  return new Intl.NumberFormat('fr-CA', {
+    style: 'currency', currency: 'CAD',
+    minimumFractionDigits: dec, maximumFractionDigits: dec
+  }).format(val);
+}
+function fmtSmall(val) {
+  if (val >= 1000000) return fmt(val/1000000, 2).replace('$','') + 'M $';
+  if (val >= 1000) return fmt(val/1000, 1).replace('$','') + 'k $';
+  return fmt(val, 0);
+}
+
+// ════════════════════════════════
+//  PRIX
+// ════════════════════════════════
+async function fetchPrice(ticker) {
+  const proxies = [
+    `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?interval=1d&range=1d`,
+    `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?interval=1d&range=1d`,
+  ];
+  for (const url of proxies) {
+    try {
+      const res = await fetch(url, { mode: 'cors' });
+      if (!res.ok) continue;
+      const data = await res.json();
+      const meta = data?.chart?.result?.[0]?.meta;
+      if (meta) {
+        const p = meta.regularMarketPrice || meta.previousClose;
+        if (p) { prices[ticker] = p; return; }
+      }
+    } catch(e) {}
+  }
+}
+
+async function fetchCADRate() {
+  try {
+    const res = await fetch('https://query1.finance.yahoo.com/v8/finance/chart/USDCAD=X?interval=1d&range=1d', { mode: 'cors' });
+    const data = await res.json();
+    const p = data?.chart?.result?.[0]?.meta?.regularMarketPrice;
+    if (p && p > 0) {
+      CAD_RATE = p;
+      document.getElementById('usd-rate').textContent = p.toFixed(4);
+    }
+  } catch(e) {}
+}
+
+// ════════════════════════════════
+//  CALCULS
+// ════════════════════════════════
+function accountValue(acc) {
+  if (acc.cash !== undefined) return acc.cash;
+  let total = 0;
+  for (const h of acc.holdings || []) {
+    const p = prices[h.ticker];
+    if (!p) continue;
+    const cadP = h.currency === 'USD' ? p * CAD_RATE : p;
+    total += cadP * h.qty;
+  }
+  return total;
+}
+
+function totalNetWorth() {
+  return ACCOUNTS.reduce((s, a) => s + accountValue(a), 0);
+}
+
+// ════════════════════════════════
+//  REFRESH
+// ════════════════════════════════
+async function refreshAll() {
+  const btn = document.getElementById('refresh-btn');
+  btn.classList.add('spinning');
+  showToast('Récupération des prix en cours…');
+
+  await fetchCADRate();
+
+  const tickers = [];
+  for (const acc of ACCOUNTS) {
+    if (acc.holdings) for (const h of acc.holdings) if (!tickers.includes(h.ticker)) tickers.push(h.ticker);
+  }
+  await Promise.allSettled(tickers.map(t => fetchPrice(t)));
+
+  btn.classList.remove('spinning');
+
+  const now = new Date();
+  document.getElementById('last-update').textContent =
+    `Actualisé à ${now.toLocaleTimeString('fr-CA')} le ${now.toLocaleDateString('fr-CA')}`;
+
+  // Historique simulé
+  const total = totalNetWorth();
+  historyData.push({ t: now, v: total });
+  if (historyData.length > 20) historyData.shift();
+
+  updateUI();
+  showToast('✓ Prix mis à jour');
+}
+
+// ════════════════════════════════
+//  UI
+// ════════════════════════════════
+function updateUI() {
+  const total = totalNetWorth();
+
+  document.getElementById('hero-value').textContent = fmt(total, 0);
+
+  if (prevTotal !== null && prevTotal > 0) {
+    const diff = total - prevTotal;
+    const pct = (diff / prevTotal) * 100;
+    const el = document.getElementById('hero-change');
+    el.textContent = `${diff >= 0 ? '+' : ''}${fmt(diff, 0)} (${diff >= 0 ? '+' : ''}${pct.toFixed(2)}%) depuis dernière actualisation`;
+    el.className = 'hero-change ' + (diff >= 0 ? 'pos' : 'neg');
+  }
+  prevTotal = total;
+
+  let inv = 0, crypto = 0, cash = 0;
+  for (const acc of ACCOUNTS) {
+    const v = accountValue(acc);
+    if (acc.type === 'cash') cash += v;
+    else if (acc.type === 'crypto') crypto += v;
+    else inv += v;
+  }
+  document.getElementById('stat-inv').textContent = fmt(inv, 0);
+  document.getElementById('stat-crypto').textContent = fmt(crypto, 0);
+  document.getElementById('stat-cash').textContent = fmt(cash, 0);
+
+  renderGrid('registered-grid', ACCOUNTS.filter(a => a.type === 'registered'), total);
+  renderGrid('other-grid', ACCOUNTS.filter(a => a.type === 'other' || a.type === 'crypto'), total);
+  renderGrid('cash-grid', ACCOUNTS.filter(a => a.type === 'cash'), total);
+
+  updateDonut(total);
+  updateLine();
+}
+
+// ── GRID ──
+function renderGrid(containerId, accs, total) {
+  const container = document.getElementById(containerId);
+  const openPanels = new Set([...container.querySelectorAll('.panel-wrap.open')].map(el => el.dataset.accid));
+
+  container.innerHTML = '';
+  accs.forEach(acc => {
+    const val = accountValue(acc);
+    const pct = total > 0 ? (val / total * 100) : 0;
+
+    // Card
+    const card = document.createElement('div');
+    card.className = 'account-card' + (openPanels.has(acc.id) ? ' active' : '');
+    card.dataset.id = acc.id;
+    card.innerHTML = `
+      <div class="ac-top">
+        <div class="ac-icon" style="background:${acc.color}18;font-size:20px;">${acc.emoji}</div>
+        <span class="ac-badge" style="background:${acc.color}18;color:${acc.color};">${acc.badge}</span>
+      </div>
+      <div class="ac-name">${acc.name}</div>
+      <div class="ac-value">${fmt(val, 0)}</div>
+      <div class="ac-sub">${pct.toFixed(1)}% du total · ${acc.holdings ? acc.holdings.length + ' position(s)' : 'Liquidités'}</div>
+      <div class="ac-bar"><div class="ac-bar-fill" style="width:${pct}%;background:${acc.color};"></div></div>
+      <div style="text-align:right;margin-top:6px;font-size:11px;color:var(--text3);">▾</div>
+    `;
+    card.onclick = () => togglePanel(acc.id);
+    container.appendChild(card);
+
+    // Panel
+    const panelWrap = document.createElement('div');
+    panelWrap.className = 'panel-wrap' + (openPanels.has(acc.id) ? ' open' : '');
+    panelWrap.dataset.accid = acc.id;
+    panelWrap.id = 'panel-' + acc.id;
+
+    if (acc.holdings) {
+      panelWrap.innerHTML = `
+        <div class="panel">
+          <table>
+            <thead>
+              <tr>
+                <th>Titre</th>
+                <th>Qté</th>
+                <th>Prix CAD</th>
+                <th>Valeur</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              ${acc.holdings.map((h, hi) => {
+                const p = prices[h.ticker];
+                const cadP = p ? (h.currency === 'USD' ? p * CAD_RATE : p) : null;
+                const hVal = cadP ? cadP * h.qty : null;
+                return `<tr>
+                  <td>${h.name}<span class="ticker">${h.ticker}</span>${h.currency==='USD'?'<span style="font-size:10px;color:var(--text3);margin-left:4px;">USD</span>':''}</td>
+                  <td style="text-align:right;">
+                    <input class="qty-input" type="number" value="${h.qty}" min="0" step="any"
+                      onchange="updateQty('${acc.id}',${hi},this.value)"
+                      onclick="event.stopPropagation()" />
+                  </td>
+                  <td class="price-tag">${cadP ? fmt(cadP, 2) : '<span class="loading-dot">···</span>'}</td>
+                  <td class="price-tag">${hVal ? fmt(hVal, 0) : '—'}</td>
+                  <td><button class="del-btn" onclick="deleteHolding('${acc.id}',${hi});event.stopPropagation()">✕</button></td>
+                </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+          <div class="add-row">
+            <input id="t-${acc.id}" placeholder="Ticker (ex: TD.TO)" maxlength="15" style="width:150px;" onclick="event.stopPropagation()" />
+            <input id="n-${acc.id}" placeholder="Nom" style="width:130px;" onclick="event.stopPropagation()" />
+            <input id="q-${acc.id}" type="number" placeholder="Qté" min="0" step="any" onclick="event.stopPropagation()" />
+            <select id="c-${acc.id}" onclick="event.stopPropagation()">
+              <option value="CAD">CAD</option>
+              <option value="USD">USD</option>
+            </select>
+            <button class="btn-add" onclick="addHolding('${acc.id}');event.stopPropagation()">+ Ajouter</button>
+          </div>
+        </div>`;
+    } else {
+      panelWrap.innerHTML = `
+        <div class="panel">
+          <div style="display:flex;align-items:center;gap:12px;font-size:14px;color:var(--text2);">
+            Solde :
+            <input class="cash-input" type="number" value="${acc.cash}"
+              onchange="updateCash('${acc.id}',this.value)"
+              onclick="event.stopPropagation()" />
+            <span style="color:var(--text3);">CAD</span>
+          </div>
+        </div>`;
+    }
+    container.appendChild(panelWrap);
+  });
+}
+
+function togglePanel(id) {
+  const panel = document.getElementById('panel-' + id);
+  if (!panel) return;
+  const isOpen = panel.classList.contains('open');
+  document.querySelectorAll('.panel-wrap').forEach(p => p.classList.remove('open'));
+  document.querySelectorAll('.account-card').forEach(c => c.classList.remove('active'));
+  if (!isOpen) {
+    panel.classList.add('open');
+    document.querySelector(`[data-id="${id}"]`)?.classList.add('active');
+  }
+}
+
+// ── MUTATIONS ──
+function updateQty(accId, hi, val) {
+  const acc = ACCOUNTS.find(a => a.id === accId);
+  if (acc?.holdings) { acc.holdings[hi].qty = parseFloat(val) || 0; saveAccounts(); updateUI(); }
+}
+function updateCash(accId, val) {
+  const acc = ACCOUNTS.find(a => a.id === accId);
+  if (acc) { acc.cash = parseFloat(val) || 0; saveAccounts(); updateUI(); }
+}
+function deleteHolding(accId, hi) {
+  const acc = ACCOUNTS.find(a => a.id === accId);
+  if (acc?.holdings) { acc.holdings.splice(hi, 1); saveAccounts(); updateUI(); }
+}
+async function addHolding(accId) {
+  const ticker = document.getElementById('t-'+accId)?.value.trim().toUpperCase();
+  const name   = document.getElementById('n-'+accId)?.value.trim();
+  const qty    = parseFloat(document.getElementById('q-'+accId)?.value);
+  const cur    = document.getElementById('c-'+accId)?.value || 'CAD';
+  if (!ticker || !qty || isNaN(qty)) { showToast('⚠ Remplis le ticker et la quantité'); return; }
+  const acc = ACCOUNTS.find(a => a.id === accId);
+  if (!acc?.holdings) return;
+  showToast('Récupération du prix de ' + ticker + '…');
+  await fetchPrice(ticker);
+  acc.holdings.push({ name: name || ticker, ticker, qty, currency: cur });
+  saveAccounts();
+  updateUI();
+  showToast('✓ ' + (name || ticker) + ' ajouté');
+}
+
+// ── DONUT ──
+function updateDonut(total) {
+  const canvas = document.getElementById('donutChart');
+  const accs = ACCOUNTS.filter(a => accountValue(a) > 0);
+  const data  = accs.map(a => accountValue(a));
+  const colors = accs.map(a => a.color);
+  const labels = accs.map(a => a.name);
+
+  document.getElementById('donut-legend').innerHTML = accs.map((acc, i) => {
+    const pct = total > 0 ? (data[i] / total * 100).toFixed(1) : '0.0';
+    return `<div class="legend-item">
+      <div class="legend-left">
+        <span class="legend-dot" style="background:${acc.color}"></span>
+        <span>${acc.emoji} ${acc.name}</span>
+      </div>
+      <span class="legend-pct">${pct}%</span>
+    </div>`;
+  }).join('');
+
+  if (donutChart) donutChart.destroy();
+  donutChart = new Chart(canvas, {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 0, hoverBorderWidth: 3, hoverBorderColor: colors }] },
+    options: {
+      responsive: false,
+      cutout: '68%',
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: (ctx) => ` ${fmt(ctx.raw, 0)} (${(ctx.raw/total*100).toFixed(1)}%)` } }
+      }
+    }
+  });
+}
+
+// ── LINE ──
+function updateLine() {
+  const canvas = document.getElementById('lineChart');
+  const labels = historyData.map(d => d.t.toLocaleTimeString('fr-CA', { hour:'2-digit', minute:'2-digit' }));
+  const data   = historyData.map(d => d.v);
+
+  if (lineChart) lineChart.destroy();
+  if (data.length < 2) {
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.font = '13px DM Sans';
+    ctx.fillStyle = '#4f5668';
+    ctx.textAlign = 'center';
+    ctx.fillText('Actualisez plusieurs fois pour voir l\'évolution', canvas.width / 2, 90);
+    return;
+  }
+
+  lineChart = new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        data,
+        borderColor: '#4f9eff',
+        backgroundColor: 'rgba(79,158,255,0.08)',
+        borderWidth: 2,
+        pointRadius: 3,
+        pointBackgroundColor: '#4f9eff',
+        fill: true,
+        tension: 0.4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx) => ' ' + fmt(ctx.raw, 0) } } },
+      scales: {
+        x: { ticks: { color: '#4f5668', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
+        y: { ticks: { color: '#4f5668', font: { size: 10 }, callback: v => fmtSmall(v) }, grid: { color: 'rgba(255,255,255,0.04)' } }
+      }
+    }
+  });
+}
+
+// ════════════════════════════════
+//  IMPORT / EXPORT
+// ════════════════════════════════
+function exportData() {
+  const payload = { accounts: ACCOUNTS, prices, exportedAt: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'patrimoine-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  showToast('✓ Données exportées');
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (data.accounts) {
+        ACCOUNTS.length = 0;
+        data.accounts.forEach(a => ACCOUNTS.push(a));
+        if (data.prices) Object.assign(prices, data.prices);
+        saveAccounts();
+        updateUI();
+        showToast('✓ Données importées');
+      }
+    } catch(err) { showToast('⚠ Fichier invalide'); }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// ════════════════════════════════
+//  TOAST
+// ════════════════════════════════
+let toastTimer;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+// ════════════════════════════════
+//  INIT
+// ════════════════════════════════
+updateUI();
+refreshAll();
+setInterval(refreshAll, 60000);
+</script>
+</body>
+</html>
